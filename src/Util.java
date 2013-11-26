@@ -1,9 +1,6 @@
 import java.math.BigInteger;
 import java.security.MessageDigest;
 
-/**
- * Created by bresiu on 23.11.13.
- */
 public class Util {
     public static final int KEY_LENGTH = 32;
     public static final String FUNCTION = "SHA1";

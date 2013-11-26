@@ -2,9 +2,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by bresiu on 11.11.13.
- */
 public class Chord {
     public static List<Node> nodeList = new ArrayList<Node>();
 
@@ -38,7 +35,6 @@ public class Chord {
         }
     }
 
-    // TODO
     // Wstaw dane do sieci (do odpowiedniego wezla)
     public static void insert(String fileName) {
         Key key = new Key(fileName);
@@ -55,7 +51,7 @@ public class Chord {
                 // biginteger z hasha node'a na odpowiedniej pozycji
                 BigInteger nodeInList = Util.hashToNum(getNode(position).getHash());
                 int result = compareHashes(keyToInsert, nodeInList);
-                if (result == -1 || result == 0){
+                if (result == -1 || result == 0) {
                     return position;
                 } else {
                     position++;
@@ -67,7 +63,6 @@ public class Chord {
         return 0;
     }
 
-    // TODO
     // Znajdz dane w sieci (odpowiedni wezel)
     public static void find(String filename) {
 
