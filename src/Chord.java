@@ -65,7 +65,25 @@ public class Chord {
 
     // Znajdz dane w sieci (odpowiedni wezel)
     public static void find(String filename) {
-
+        BigInteger keyToFind = Util.hashToNum(Util.toHash(filename));
+        int position = -1;
+        for (int i = 0; i < size(); i++) {
+            if (!nodeList.get(i).getKeys().isEmpty()) {
+                for (int j = 0; j < nodeList.get(i).getKeys().size(); j++) {
+                    BigInteger keyInNode = Util.hashToNum(nodeList.get(i).getKeys().get(j).getHash());
+                    int result = compareHashes(keyToFind, keyInNode);
+                    if (result == 0) {
+                        position = i;
+                    }
+                }
+            }
+        }
+        if (position == -1) {
+            System.out.println("Nie znaleziono pliku " + filename);
+        } else {
+            System.out.println("Plik: " + filename + " znajduje sie w wezle: "
+                    + nodeList.get(position).getAddress());
+        }
     }
 
     private static int getCorrectNodePosition(String address) {
@@ -191,5 +209,8 @@ public class Chord {
         insert(a);
         insert(e);
         nodeListToString();
+        find(c);
+        find(a);
+        find("f");
     }
 }
