@@ -9,11 +9,15 @@ public class Chord {
     public static List<Node> nodeList = new ArrayList<Node>();
 
     // Dolacz wezel do sieci
-    // TODO get keys from successor
     public static void join(String address) {
+        // tworzenie nowego wezla
         Node node = new Node(address);
-        if (getCorrectNodePosition(address) >= 0) {
-            nodeList.add(getCorrectNodePosition(address), node);
+        // obliczanie poprawnej pozycji do wstawienia wezla
+        int position = getCorrectNodePosition(address);
+        if (position >= 0) {
+            nodeList.add(position, node);
+            // przechwycenie kluczy nastepnika
+            notifySuccessorCome(node, getSuccessor(node));
         } else {
             System.out.println("Node already in Chord.");
         }
@@ -34,21 +38,39 @@ public class Chord {
         }
     }
 
+    // TODO
     // Wstaw dane do sieci (do odpowiedniego wezla)
     public static void insert(String fileName) {
-        int hash = fileName.hashCode();
+        Key key = new Key(fileName);
+        int position = getCorrectKeyNode(fileName);
+        getNode(position).getKeys().add(key);
     }
 
+    private static int getCorrectKeyNode(String fileName) {
+        int position = 0;
+        // biginteger z hasha key'a do wstawienia
+        BigInteger keyToInsert = Util.hashToNum(Util.toHash(fileName));
+        if (!nodeList.isEmpty()) {
+            while (position < size()) {
+                // biginteger z hasha node'a na odpowiedniej pozycji
+                BigInteger nodeInList = Util.hashToNum(getNode(position).getHash());
+                int result = compareHashes(keyToInsert, nodeInList);
+                if (result == -1 || result == 0){
+                    return position;
+                } else {
+                    position++;
+                }
+            }
+        }
+        // jezeli petla doszla do tego momentu, znaczy, ze hash klucza jest wiekszy niz
+        // hashe wszystkich wezlow. Zwraca pozycje pierwszego wezla
+        return 0;
+    }
+
+    // TODO
     // Znajdz dane w sieci (odpowiedni wezel)
     public static void find(String filename) {
 
-    }
-
-    public static void nodeListToString() {
-        for (int i = 0; i < size(); i++) {
-            System.out.print(getNode(i).getAddress() + " (" + Util.hashToNum(getNode(i).getHash()) + ") ");
-        }
-        System.out.println();
     }
 
     private static int getCorrectNodePosition(String address) {
@@ -59,7 +81,7 @@ public class Chord {
             while (position < size()) {
                 // biginteger z hasha node'a na odpowiedniej pozycji
                 BigInteger nodeInserted = Util.hashToNum(getNode(position).getHash());
-                int result = compareHashes(nodeToInsert, nodeInserted)
+                int result = compareHashes(nodeToInsert, nodeInserted);
                 if (result == -1) {
                     // a < b
                     return position;
@@ -92,7 +114,7 @@ public class Chord {
     }
 
     private static void notifySuccessorLeave(Node successor, List<Key> listOfKeys) {
-        // kopoiowanie wszystkich kluczy do nastepcy
+        // kopiowanie wszystkich kluczy do nastepcy
         successor.keys.addAll(listOfKeys);
     }
 
@@ -101,10 +123,15 @@ public class Chord {
     }
 
     private static void notifySuccessorCome(Node node, Node successor) {
+        // Biginteger hasha
         BigInteger nodeHash = Util.hashToNum(node.getHash());
+        // szukanie wszystkich kluczy nastepnika
         for (int i = 0; i < successor.getKeys().size(); i++) {
+            // zamiana hasha klucza na biginteger w celu porownania
             BigInteger keyHash = Util.hashToNum(successor.getKeys().get(i).getHash());
+            // porownanie
             int result = compareHashes(nodeHash, keyHash);
+            // wszystkie mniejsze, rowne hashe dodawane do node'a i usuwane z nastepnika
             if (result == 1 || result == 0) {
                 Key temp = successor.getKeys().get(i);
                 successor.getKeys().remove(i);
@@ -113,8 +140,24 @@ public class Chord {
         }
     }
 
+    // zwraca wielkosc tablicy wezlow
     private static int size() {
         return nodeList.size();
+    }
+
+    public static void nodeListToString() {
+        for (int i = 0; i < size(); i++) {
+            System.out.print(getNode(i).getAddress() + " (" +
+                    Util.hashToNum(getNode(i).getHash()) + ") ");
+            if (!getNode(i).getKeys().isEmpty()) {
+                String keyList = "";
+                for (int j = 0; j < getNode(i).getKeys().size(); j++) {
+                    keyList += "|" + Util.hashToNum(getNode(i).getKeys().get(j).getHash()) + "| ";
+                }
+                System.out.println("Keys: " + keyList);
+            }
+        }
+        System.out.println();
     }
 
     public static void main(String[] args) {
@@ -122,6 +165,7 @@ public class Chord {
         String b = "b";
         String c = "c";
         String d = "d";
+        String e = "e";
         join(a);
         nodeListToString();
         leave(a);
@@ -137,6 +181,20 @@ public class Chord {
         leave(a);
         nodeListToString();
         leave("e");
+        nodeListToString();
+        // spr czy poprawnie zwraca nastepnika w przypadku ostatniego wezla
+        System.out.println("Nastepnik wezla: \'" + getNode(nodeList.size() - 1).getAddress()
+                + "\' to \'" + getSuccessor(getNode(nodeList.size() - 1)).getAddress() + "\'");
+        join(a);
+        nodeListToString();
+        join(a);
+        nodeListToString();
+        insert(a);
+        insert(b);
+        insert(c);
+        insert(d);
+        insert(a);
+        insert(e);
         nodeListToString();
     }
 }
